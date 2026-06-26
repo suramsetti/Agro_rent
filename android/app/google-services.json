@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058577405468",
+    "project_id": "agrorental-e3fb1",
+    "storage_bucket": "agrorental-e3fb1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058577405468:android:4a328ebedd7bfcbe63b1d9",
+        "android_client_info": {
+          "package_name": "com.example.f_pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq8xXyWdQJP84rMbnPvrnOagNHcPCH4xU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

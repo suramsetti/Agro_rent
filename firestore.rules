@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.admin == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: isOwner(userId) || isAdmin();
+      allow write: isOwner(userId) || isAdmin();
+      allow create: isAuthenticated() && userId == request.auth.uid;
+    }
+    
+    // Machines collection
+    match /machines/{machineId} {
+      allow read: true; // Anyone can read machine listings
+      allow create: isAuthenticated();
+      allow update: isAuthenticated() && 
+                   (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+    
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read: isAuthenticated() && 
+                  (resource.data.ownerId == request.auth.uid || 
+                   resource.data.renterId == request.auth.uid || 
+                   isAdmin());
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.renterId;
+      allow update: isAuthenticated() && 
+                   (resource.data.ownerId == request.auth.uid || 
+                    resource.data.renterId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      allow read: true; // Anyone can read product listings
+      allow create: isAuthenticated();
+      allow update: isAuthenticated() && 
+                   (resource.data.sellerId == request.auth.uid || isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.sellerId == request.auth.uid || isAdmin());
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: isAuthenticated() && 
+                  (resource.data.buyerId == request.auth.uid || 
+                   isAdmin());
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.buyerId;
+      allow update: isAuthenticated() && 
+                   (resource.data.buyerId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      allow read: true; // Anyone can read reviews
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.reviewerId;
+      allow update: isAuthenticated() && 
+                   (resource.data.reviewerId == request.auth.uid || 
+                    isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.reviewerId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Drivers collection
+    match /drivers/{driverId} {
+      allow read: isAuthenticated() && 
+                  (resource.data.userId == request.auth.uid || 
+                   isAdmin());
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.userId;
+      allow update: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Maintenance collection
+    match /maintenance/{maintenanceId} {
+      allow read: isAuthenticated() && 
+                  (resource.data.ownerId == request.auth.uid || 
+                   isAdmin());
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.ownerId;
+      allow update: isAuthenticated() && 
+                   (resource.data.ownerId == request.auth.uid || 
+                    isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.ownerId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: isAuthenticated() && 
+                  resource.data.userId == request.auth.uid;
+      allow create: isAuthenticated(); // System can create notifications
+      allow update: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Favorites collection
+    match /favorites/{favoriteId} {
+      allow read: isAuthenticated() && 
+                  resource.data.userId == request.auth.uid;
+      allow create: isAuthenticated() && 
+                   request.auth.uid == resource.data.userId;
+      allow update: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+      allow delete: isAuthenticated() && 
+                   (resource.data.userId == request.auth.uid || 
+                    isAdmin());
+    }
+    
+    // Deny all other operations
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
